@@ -5,16 +5,18 @@
 - Tên nhóm: 5AnhTay
 - Lớp: L3A
 - Repo nhóm: `K5-L3A-DAY08-5AnhTay-FromWorkflowsToAgents` (xem [SUBMISSION.md](SUBMISSION.md))
-- URL repo, nhánh nộp, commit chốt: https://github.com/PhiHoangNamRaymond/K5-L3A-DAY08-5AnhTay-FromWorkflowsToAgents.git, nhánh main, commit `f76645f`
+- URL repo, nhánh nộp, commit chốt: https://github.com/PhiHoangNamRaymond/K5-L3A-DAY08-5AnhTay-FromWorkflowsToAgents.git, nhánh main
 
 ## Thành viên
 
 | STT | Họ tên | MSSV | Email | GitHub | Vai trò |
 | --: | ------ | ---- | ----- | ------ | ------- |
 |   1 | Nguyễn Hải Anh | 2A202603484 | haianh29112@gmail.com | haianh02034 | Workflow (Shape A) |
-|   2 | Nguyễn Ngọc Hiếu | 2A202603502 | hieunn3003@gmail.com | NguyenNgocHieu03502 | Orchestrator + handoff (Shape C) |
-|   3 | Bùi Văn Lâm | 2A202603400 | 26ai.lambv@vinuni.edu.vn | buivanlam | Single ReAct (Shape B) |
-|   4 | Phí Hoàng Nam | 2A202603435 | phinamyb2004@gmail.com | PhiHoangNamRaymond | Tích hợp và kiểm thử an toàn |
+|   2 | Nguyễn Ngọc Hiếu | 2A202603502 | hieunn3003@gmail.com | robyvn | Orchestrator + handoff (Shape C) |
+|   3 | Bùi Văn Lâm | 2A202603400 | 26ai.lambv@vinuni.edu.vn | buivanlam | Single (Shape B) |
+|   4 | Vũ Quang Dũng | 2A202603486 | vuquangdung2309@gmail.com | https://github.com/qdung2003 | Kiểm thử Shape C (test C8) |
+|   5 | Phí Hoàng Nam | 2A202603435 | phinamyb2004@gmail.com | PhiHoangNamRaymond | Tích hợp và kiểm thử an toàn |
+
 
 Gợi ý chia vai:
 
@@ -28,9 +30,10 @@ Gợi ý chia vai:
 | Người | Vai | Commit | Test đã thêm hoặc sửa |
 | --- | --- | --- | --- |
 | Nguyễn Hải Anh | workflow | 54917fd | src/tests/test_workflow_shape.py |
-| Nguyễn Ngọc Hiếu | orchestrator và tích hợp Shape B | 3565f22, f9966e2 | Chờ đối chiếu commit thêm hoặc sửa test của thành viên |
-| Bùi Văn Lâm | single ReAct | da5a5f2 (nhánh buivanlam), tích hợp vào main qua f9966e2 | Chờ đối chiếu commit thêm hoặc sửa test của thành viên |
-| Phí Hoàng Nam | tích hợp và kiểm thử an toàn | f76645f | src/tests/test_safety_integration.py |
+| Nguyễn Ngọc Hiếu | Orchestrator và tích hợp Shape B | 3565f22, f9966e2, f5505ed | src/tests/test_orchestrator_boundaries.py |
+| Bùi Văn Lâm | Single ReAct | da5a5f2 (nhánh buivanlam), tích hợp qua f9966e2 | Ma trận student kiểm tra Shape B. Chờ commit test do Lâm thêm hoặc sửa. |
+| Vũ Quang Dũng | Kiểm thử Shape B và C | 726d632 | src/tests/test_orchestrator_shape.py, src/tests/test_single_shape.py |
+| Phí Hoàng Nam | Tích hợp và kiểm thử an toàn | f76645f | src/tests/test_safety_integration.py |
 
 ## Cá nhân
 
@@ -87,6 +90,8 @@ Sao chép mục dưới đây cho từng thành viên.
 ### Bằng chứng
 
 - Commit: `3565f22` (`feat(shape-c): implement orchestrator with read-only investigators`)
+- Test tự viết: `src/tests/test_orchestrator_boundaries.py` (19/19 passed)
+- Test của vudung2003: `src/tests/test_orchestrator_shape.py` (commit `726d632`; 5/5 passed trên code Shape C)
 - Ma trận student: `pytest -q -m student -o addopts= -k orchestrator` (62/62 passed)
 - `python -m lab8.check_submission`: `[ OK ] shape orchestrator: format đúng, 12/12 claim public pass ở seed 11`
 - Báo cáo chi tiết: `report/team/2A202603502_NguyenNgocHieu.md`
@@ -101,3 +106,8 @@ Sao chép mục dưới đây cho từng thành viên.
 - Tích hợp và kiểm thử các ca crash sau checkpoint, approval cấp cho claim khác và secret trong ticket.
 - Sửa trace Workflow và chạy lại test, benchmark, crash suite trước khi chốt ADR.
 - Báo cáo cá nhân: [2A202603435_PhiHoangNam.md](report/team/2A202603435_PhiHoangNam.md).
+
+## 2A202603486_VuQuangDung
+
+- Kiểm thử riêng Shape B và C, gồm ca crash ở cả ba mốc ghi hoàn tiền.
+- Báo cáo cá nhân: [2A202603486_VuQuangDung.md](report/team/2A202603486_VuQuangDung.md).
