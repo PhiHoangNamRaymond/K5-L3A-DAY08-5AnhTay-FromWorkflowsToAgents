@@ -27,7 +27,7 @@ Gợi ý chia vai:
 | Người | Vai | Commit | Test đã thêm hoặc sửa |
 | --- | --- | --- | --- |
 | Nguyễn Hải Anh | workflow | 54917fd | src/tests/test_workflow_shape.py |
-| Nguyễn Ngọc Hiếu | orchestrator | 3565f22 | (chưa có: test orchestrator do thành viên khác phụ trách) |
+| Nguyễn Ngọc Hiếu | orchestrator | 3565f22 | src/tests/test_orchestrator_boundaries.py |
 | Bùi Văn Lâm | single | f9966e2 | src/tests/test_single_shape.py |
 
 ## Cá nhân
@@ -85,6 +85,8 @@ Sao chép mục dưới đây cho từng thành viên.
 ### Bằng chứng
 
 - Commit: `3565f22` (`feat(shape-c): implement orchestrator with read-only investigators`)
+- Test tự viết: `src/tests/test_orchestrator_boundaries.py` (19/19 passed)
+- Test của vudung2003: `src/tests/test_orchestrator_shape.py` (commit `726d632`; 5/5 passed trên code Shape C)
 - Ma trận student: `pytest -q -m student -o addopts= -k orchestrator` (62/62 passed)
 - `python -m lab8.check_submission`: `[ OK ] shape orchestrator: format đúng, 12/12 claim public pass ở seed 11`
 - Báo cáo chi tiết: `report/team/2A202603502_NguyenNgocHieu.md`

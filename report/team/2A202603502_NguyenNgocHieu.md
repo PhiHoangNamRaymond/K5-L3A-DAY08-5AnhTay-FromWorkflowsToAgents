@@ -38,11 +38,25 @@
 
 **Field cố ý không ghi vào trace:** nội dung `ticket`, claim row thô (`parent_secret`, `raw_headers`), order row thô (SĐT, địa chỉ, tên hàng, ghi chú nội bộ). Trace chỉ ghi: `claim_id` và cờ có/không có `order_id`, handoff đã sanitize, order view đã qua `ORDER_FIELDS`, lịch sử hoàn tiền (số lần, tổng tiền), số policy hiện hành, quote và quyết định cuối.
 
-**Test:** test riêng cho Shape C do thành viên khác trong nhóm phụ trách; phần của tôi được kiểm bằng ma trận student và các lần chạy thử ghi ở mục 4.
+**Test đã thêm:** `src/tests/test_orchestrator_boundaries.py`, 19 test chạy trong cổng host, bổ sung cho bộ test của vudung2003 (không lặp lại phần crash):
+
+- `test_forbidden_list_is_not_empty`: chặn trường hợp danh sách chuỗi cấm rỗng làm phép quét bên dưới luôn pass.
+- `test_investigator_tool_list_is_read_only`: `INVESTIGATOR_TOOLS` nằm trong `READONLY_TOOLS`.
+- `test_trace_records_sanitized_handoff_only`: trace có đúng một handoff, chỉ gồm field allowlist, `facts` rỗng, tool chỉ đọc.
+- `test_trace_has_no_secret_pii_or_ticket` (14 claim public): trace không chứa secret, SĐT, địa chỉ, ghi chú, tên hàng lấy từ dữ liệu, cũng không chứa nguyên văn ticket.
+- `test_full_quote_when_order_already_fully_refunded` (T13): `denied`, `proposal_amount` 35.000, không ghi ledger, có audit `policy_denied`.
+- `test_full_quote_host_pays_only_difference` (T14): `resolved`, `proposal_amount` 150.000, ledger 120.000.
+
+**Test của thành viên khác dùng để kiểm Shape C:** `src/tests/test_orchestrator_shape.py`, do `vudung2003` viết (commit `726d632`), 5 test gồm:
+
+- `test_handoff_rejects_write_tool`: handoff có `issue_refund` bị `make_handoff` từ chối (`HandoffError`).
+- `test_orchestrator_trace_has_no_parent_secret`: trace không chứa `CANARY_SECRET_`, `parent_secret`, `raw_headers`.
+- `test_orchestrator_crash_then_resume_yields_single_refund` (3 điểm crash): crash xảy ra thật; resume xong còn 1 dòng ledger, 1 audit `refund_committed`, số tiền khớp `proposal_amount`.
 
 ## 4. Bằng chứng
 
 - `git show 3565f22` — commit thuộc tác giả `NguyenNgocHieu03502`.
+- `python -m pytest -q tests/test_orchestrator_boundaries.py`: **19 passed**; `python -m pytest -q tests/test_orchestrator_shape.py`: **5 passed**; cổng host `python -m pytest -q`: **84 passed**.
 - `python -m pytest -q -m student -o addopts= -k orchestrator`: **62 passed** (T01–T10, T13, T14 × 5 seed, cộng T11 retry và T12 crash).
 - `python -m pytest -q` (cổng host): xanh, không có dòng `failed`.
 - `python -m lab8.check_submission`: `[ OK ] shape orchestrator: format đúng, 12/12 claim public pass ở seed 11`.
@@ -64,4 +78,4 @@
 
 - Hoàn thành Shape C: qua toàn bộ ma trận student, đúng contract `RunResult` và Trace contract v1, không lộ secret/PII trong trace.
 - Không sửa file thước đo (`metrics.py`, `durability.py`, `policy.py`, `config/`, `data/`).
-- Còn thiếu: test riêng cho Shape C do chính tôi viết (hiện do thành viên khác phụ trách).
+- Có bộ test tự viết cho Shape C (`src/tests/test_orchestrator_boundaries.py`, 19 test) khóa lại ranh giới handoff, trace sạch và trần theo đơn; Shape C cũng qua bộ test của vudung2003 (`src/tests/test_orchestrator_shape.py`, 5/5).
