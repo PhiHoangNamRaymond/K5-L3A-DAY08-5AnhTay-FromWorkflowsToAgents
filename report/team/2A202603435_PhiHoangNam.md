@@ -4,7 +4,7 @@
 
 - Họ tên: Phí Hoàng Nam
 - MSSV: 2A202603435
-- Email: phinamyb2004@gmail.com
+- Email: 26ai.namph3@vinuni.edu.vn
 - GitHub: PhiHoangNamRaymond
 - Nhóm: 5AnhTay, lớp L3A
 
