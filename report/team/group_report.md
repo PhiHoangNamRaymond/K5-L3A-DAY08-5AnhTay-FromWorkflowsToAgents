@@ -2,7 +2,7 @@
 
 > **Nhóm:** 5AnhTay · **Lớp:** L3A  
 > **Dự án:** K5-L3A-DAY08-5AnhTay-FromWorkflowsToAgents  
-> **Commit chốt:** `f9966e2` (trùng `report/team/decision_adr.md`)
+> **Commit chốt:** `f76645f` (trùng `report/team/decision_adr.md`)
 
 ---
 
@@ -10,7 +10,7 @@
 
 - Tên nhóm: 5AnhTay
 - Thành viên: xem [TEAM.md](../../TEAM.md)
-- Commit chốt: `f9966e2`
+- Commit chốt: `f76645f`
 
 ---
 
@@ -19,7 +19,7 @@
 Bài toán yêu cầu xử lý quy trình yêu cầu bồi thường/hoàn tiền cước vận chuyển (claims refund) của công ty giả lập LogiX-VN thông qua bốn kiến trúc (Shape A: Workflow, Shape B: Single ReAct Agent, Shape C: Orchestrator, Shape D: Swarm Reference).
 
 Mục tiêu học thuật cốt lõi là phân định ranh giới nghiêm ngặt giữa **Code** (kiểm soát tài chính, cấp phép approval, kiểm tra idempotency, trần hoàn tiền theo đơn) và **Model** (đọc hiểu và soạn thảo câu chữ). Nhóm tiếp cận theo chiến lược:
-1. Triển khai Shape B (`single.py`) làm trung tâm với cơ chế ReAct Hybrid có guardrail dữ liệu.
+1. Triển khai Shape B (`single.py`) với vòng ReAct giới hạn và công cụ đọc.
 2. Xây dựng Shape A (`workflow.py`) làm chuẩn đối chứng xác định (deterministic baseline).
 3. Hoàn thiện Shape C (`orchestrator.py`) với cơ chế phân tách quyền và gói handoff allowlist.
 4. Chạy kiểm thử Crash Suite 20/20 và đo đạc Benchmark toàn diện 4 shape $\times$ 5 seed trên bộ dữ liệu public để đưa ra quyết định kiến trúc dựa trên số liệu thực chứng.
@@ -60,7 +60,7 @@ flowchart LR
    - Orchestrator nhận kết quả điều tra có cấu trúc và là bên duy nhất gọi `issue_refund` với quote đầy đủ.
 4. **An toàn Trace & Crash (T11, T12):**
    - Cả 3 shape đều chuyển tiếp tham số `crash_at` vào `durability.issue_refund` và không nuốt ngoại lệ `InjectedCrash`.
-   - Khi gặp crash, hệ thống flush trace trước khi re-raise để đảm bảo trace contract v1 vẫn được ghi nhận đầy đủ.
+   - Khi gặp crash, shape ghi trace của điểm crash rồi ném lại ngoại lệ. Lần resume ghi trace mới và trả kết quả để đối chiếu với ledger.
 
 ---
 
@@ -70,14 +70,15 @@ Toàn bộ số liệu dưới đây được trích xuất trực tiếp từ [
 
 | Shape | Pass rate | Pass^5 | Seed Min–Max | Seed Variance | Cost/Success (VND) | Mean Steps | p95 Steps | Ghi chú lỗi |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **A: `workflow`** | **1.000** | **1.000** | 1.000 – 1.000 | 0.000000 | **27.86** | 3.79 | 4.0 | Không có lỗi (70/70 ok) |
-| **B: `single`** *(Shape chọn)* | **1.000** | **1.000** | 1.000 – 1.000 | 0.000000 | **39.53** | 1.93 | 2.0 | Không có lỗi (70/70 ok) |
+| **A: `workflow`** *(Shape chọn)* | **1.000** | **1.000** | 1.000 – 1.000 | 0.000000 | **27.86** | 3.79 | 4.0 | Không có lỗi (70/70 ok) |
+| **B: `single`** | **1.000** | **1.000** | 1.000 – 1.000 | 0.000000 | **39.53** | 1.93 | 2.0 | Không có lỗi (70/70 ok) |
 | **C: `orchestrator`** | **1.000** | **1.000** | 1.000 – 1.000 | 0.000000 | 56.52 | 4.71 | 5.0 | Không có lỗi (70/70 ok) |
 | **D: `swarm`** *(Reference)* | 0.986 | 0.929 | 0.929 – 1.000 | 0.000816 | 49.57 | 2.80 | 3.0 | Thất bại T02 seed 55 do tin ticket |
 
-- **Crash Safety:** **`20/20`** điểm tuyệt đối trên suite 20 kịch bản crash.
-- **Rò rỉ bảo mật (Secret Leak / PII):** `0` vi phạm.
-- **Vượt quyền duyệt (Approval Bypass):** `0` vi phạm.
+- Crash suite đạt **20/20** trên các kịch bản của host và Swarm. T11, T12 và ca `after_checkpoint` kiểm tra riêng A–C.
+- Các ca public và test tích hợp đã chạy trên A–C ghi nhận 0 lỗi rò secret hoặc vượt quyền approval. Toàn bộ 318 test pass, gồm 10 ca tích hợp mới.
+- Workflow đạt cùng pass rate với Single và Orchestrator ở chi phí mô phỏng thấp nhất. Chi tiết lựa chọn ở [ADR](decision_adr.md).
+- Trong ablation của Orchestrator, tắt lượt đọc lịch sử giảm chi phí từ 56,52 xuống 47,23 VND trên mỗi lần thành công. Hai điều kiện đều đạt 70/70 trial. [Research card](research_card.md).
 
 ---
 
@@ -96,7 +97,9 @@ Toàn bộ số liệu dưới đây được trích xuất trực tiếp từ [
    - *Cách xử lý:* Tạo `src/.venv` bằng Python 3.12 có sẵn (cài qua uv) và chạy toàn bộ benchmark, crash test bằng venv đó.
 4. **Ba shape được viết song song trên các nhánh khác nhau:**
    - *Khó khăn:* Nhánh `buivanlam` có bản workflow và orchestrator riêng, khác với bản đã merge trên `main`; số liệu benchmark cũ trên nhánh đó đo trên code khác với code nộp.
-   - *Cách xử lý:* Chỉ đưa `single.py` từ nhánh đó vào `main`, giữ workflow và orchestrator đã có, rồi chạy lại benchmark và crash test trên commit `f9966e2`. Mọi số trong báo cáo lấy từ lần chạy này.
+   - *Cách xử lý:* Đưa Shape B vào `main` qua commit `f9966e2`, giữ các triển khai A và C của nhóm. Số liệu nộp lấy từ lần chạy lại benchmark và crash suite sau khi tích hợp.
+5. **Dữ liệu ticket trong trace Workflow**
+   - Test mới đặt một chuỗi canary trong ticket và tái hiện lỗi trace. Sửa sự kiện `claim` để chỉ giữ mã claim và cờ có mã đơn, rồi chạy lại toàn bộ test.
 
 ---
 
@@ -106,7 +109,7 @@ Chi tiết đóng góp và phân công trách nhiệm được ghi nhận tại 
 - **Bùi Văn Lâm:** Thiết kế và cài đặt Shape B (`single.py`), thiết lập ReAct guardrail, xác minh toàn bộ 62 student tests của Shape B và điều phối thực nghiệm benchmark.
 - **Nguyễn Hải Anh:** Cài đặt Shape A (`workflow.py`) và bộ test `src/tests/test_workflow_shape.py`.
 - **Nguyễn Ngọc Hiếu:** Cài đặt Shape C (`orchestrator.py`) với handoff allowlist và investigator chỉ đọc; đưa Shape B vào `main`, chạy lại benchmark và crash test.
-- Các thành viên khác đảm nhận phần việc theo phân công trong [TEAM.md](../../TEAM.md).
+- **Phí Hoàng Nam:** Tích hợp các ca crash sau checkpoint, approval mượn từ claim khác và secret trong ticket. Sửa trace Workflow, chạy lại bằng chứng và cập nhật ADR. [Báo cáo cá nhân](2A202603435_PhiHoangNam.md).
 
 ---
 
@@ -114,13 +117,14 @@ Chi tiết đóng góp và phân công trách nhiệm được ghi nhận tại 
 
 - MockLLM trong bài lab là mô hình mô phỏng cố định theo seed, không phản ánh độ trễ mạng thực tế (`latency: unavailable`).
 - Bảng giá token là giá giả lập trong môi trường đào tạo.
+- Bộ dữ liệu cho giảng viên được chấm riêng. Báo cáo ghi kết quả public và các ca tích hợp.
 - Hướng cải thiện: Khi triển khai thực tế trên Production, cần tích hợp semantic cache cho các lời gọi ReAct và áp dụng phương thức streaming response để tối ưu hóa thời gian phản hồi cho người dùng cuối.
 
 ---
 
 ## 8. Tài liệu tham khảo
 
-1. Google Research (2026), *Towards a Science of Scaling Agent Systems*.
+1. Kim và cộng sự (2026, bản v2), [*Towards a Science of Scaling Agent Systems*](https://arxiv.org/abs/2512.08296v2).
 2. MAST, NeurIPS (2025), *Why Do Multi-Agent LLM Systems Fail?*
 3. DBOS (2025), *Durable Workflows and Steps in Production*.
 4. Tài liệu nội bộ Lab 8 LogiX-VN, AI20K K5, VinAI.

@@ -3,28 +3,28 @@
 Điền sau dấu `:` trên cùng dòng, không xóa nhãn. Giảng viên và `python -m lab8.check_submission` (chạy trong `src/`) đọc các dòng này bằng máy. Không đổi tên hay dời file này khỏi `report/team/`.
 `Shape chọn` phải là đúng một trong: `workflow`, `single`, `orchestrator`, `swarm`. Đây là shape được chấm cổng hidden.
 
-- Shape chọn: single
-- Commit hash: f9966e2
-- Run id dẫn chứng: R-single-C-001-s11
+- Shape chọn: workflow
+- Commit hash: f76645f
+- Run id dẫn chứng: R-workflow-C-001-s11
 - Pass rate / pass^5 / seed min-max / variance: 1.000 / 1.000 / 1.000 - 1.000 / 0.000000
-- Cost per success (mô phỏng, VND): 39.53 VND
-- Crash safety: 20/20 (src/reports/crash.json)
-- Secret leak / approval bypass: 0 / 0
-
-Ví dụ một dòng đã điền: `- Shape chọn: workflow`, `- Crash safety: 20/20 (src/reports/crash.json)`.
+- Cost per success (mô phỏng, VND): 27.86 VND
+- Crash safety: 20/20 trên suite host và Swarm (src/reports/crash.json). Workflow qua T11, T12 và after_checkpoint trong pytest.
+- Secret leak / approval bypass: 0 / 0 trong các ca public và test tích hợp tương ứng của Workflow.
 
 ## Vì sao shape này
 
-Nhóm chọn Shape B (`single`) vì đây là điểm cân bằng tối ưu giữa tính tự chủ của Agent và độ tin cậy vận hành. Single ReAct Agent tự chủ quyết định việc tra cứu tuần tự các công cụ đọc (`lookup_order`, `lookup_refund_history`, `compute_compensation`) trong phạm vi giới hạn nghiêm ngặt (tối đa 8 bước). Trên bộ dữ liệu 14 claim qua 5 seed (70 trial), Shape B đạt pass rate tuyệt đối 1.000, pass^5 đạt 1.000, phương sai hạt giống (seed variance) bằng 0.000000, và chi phí mô phỏng là 39.53 VND/success (rẻ hơn 30% so với Orchestrator 56.52 VND và rẻ hơn 20% so với Swarm 49.57 VND), đồng thời hoàn toàn loại bỏ được rủi ro dao động thất bại của Swarm (Swarm fail tại T02 seed 55).
+Chọn Workflow (Shape A) theo tiêu chí dùng mức tự chủ thấp nhất đáp ứng yêu cầu. Trên cùng 14 claim và 5 seed, Workflow, Single và Orchestrator đều đạt 70/70, pass^5 bằng 1 và phương sai bằng 0. Workflow có chi phí mỗi lần thành công thấp nhất, 27,86 VND mô phỏng, so với 39,53 của Single và 56,52 của Orchestrator. [Benchmark](../../src/reports/benchmark.json).
 
 ## Có đáng đổi lấy multi-agent không
 
-Không đáng đổi lấy Multi-agent (Swarm hay Orchestrator) cho tác vụ xử lý khiếu nại LogiX-VN này. Kết quả benchmark thực tế chứng minh quy trình claim là luồng nghiệp vụ phụ thuộc tuần tự (order $\rightarrow$ policy $\rightarrow$ compensation $\rightarrow$ refund). Việc đưa thêm các agent giao tiếp ngang hàng như Swarm làm chi phí tăng thêm 25.4% (từ 39.53 lên 49.57 VND), số bước tăng từ 1.93 lên 2.80, và làm giảm pass rate xuống 0.986 với phương sai 0.000816. Nhóm sẽ chỉ cân nhắc đổi sang Multi-agent khi bài toán xuất hiện các luồng điều tra song song độc lập trên quy mô lớn (ví dụ nhiều kho hàng cần xác minh cùng lúc) hoặc khi các domain chuyên môn hóa yêu cầu ranh giới ủy quyền phân cấp bảo mật chặt chẽ.
+Trên bộ public, Orchestrator có cùng tỷ lệ pass với Workflow ở chi phí cao hơn. Swarm đạt 69/70 và sai T02 ở seed 55 khi dùng số ngày trễ trong ticket. Có thể xem xét lại lựa chọn nếu dữ liệu mới có nhiều bước xác minh độc lập chạy song song và phép đo trên cùng bộ claim cho thấy lợi ích đủ bù chi phí điều phối.
 
 ## Trace và bằng chứng
 
-Trace của Shape B ghi nhận các sự kiện: `react_init` (chỉ `claim_id`, `order_id`), `quote`, `decision`, `error` (claim không tồn tại) và `crash`. Các trường cố ý **không ghi** bao gồm: `parent_secret`, `raw_headers`, số điện thoại khách hàng, địa chỉ giao hàng, tên hàng hóa chi tiết và ghi chú nội bộ. Các trường này được loại bỏ chủ động qua allowlist của tool adapter và trace contract. Nếu trace nằm ngoài vùng scanner tự động quét, đội an ninh chứng minh bằng tính bất biến của code (code invariants): hàm `get_claim_view` và `lookup_order` chỉ chọn các trường trong danh sách cho phép, và mọi luồng chuyển tiếp dữ liệu đều thông qua cấu trúc dữ liệu đã được sanitize cứng trong mã nguồn trước khi ghi ra đĩa.
+Workflow ghi các sự kiện `claim`, `lookup_order`, `quote` và `decision` hoặc `refund_outcome` theo nhánh xử lý. Nhánh lỗi ghi `error` hoặc `crash`. Sự kiện `claim` chỉ giữ mã claim và cờ có mã đơn. Dữ liệu đơn đi qua các trường đã cho phép của `lookup_order`.
+
+Trace của lần chạy có tên theo `run_id`. Test tích hợp đặt một secret giả trong ticket, rồi kiểm tra kết quả, các file scanner đọc và stdout/stderr. Ca approval cấp cho claim khác xác nhận không có refund hoặc audit `refund_committed`, và có audit `policy_denied` với lý do `approval_claim_mismatch`. [Test tích hợp](../../src/tests/test_safety_integration.py).
 
 ## Giới hạn
 
-MockLLM không phải model sản xuất thực tế; latency được ghi nhận là `unavailable`. Các số liệu chi phí dựa trên bảng giá mô phỏng trong `config/pricing.yaml`. Toàn bộ số liệu được trích xuất tự động từ `src/reports/benchmark.json` và `src/reports/crash.json`, nhóm không chỉnh sửa thủ công để đạt chỉ số.
+MockLLM và chi phí là mô phỏng. Latency được ghi là `unavailable`. Số bước trong benchmark là số sự kiện trace. Các kết quả trên thuộc bộ public và các ca tích hợp. Điểm hidden do giảng viên đo.

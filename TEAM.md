@@ -5,7 +5,7 @@
 - Tên nhóm: 5AnhTay
 - Lớp: L3A
 - Repo nhóm: `K5-L3A-DAY08-5AnhTay-FromWorkflowsToAgents` (xem [SUBMISSION.md](SUBMISSION.md))
-- URL repo, nhánh nộp, commit chốt: https://github.com/PhiHoangNamRaymond/K5-L3A-DAY08-5AnhTay-FromWorkflowsToAgents.git, nhánh main
+- URL repo, nhánh nộp, commit chốt: https://github.com/PhiHoangNamRaymond/K5-L3A-DAY08-5AnhTay-FromWorkflowsToAgents.git, nhánh main, commit `f76645f`
 
 ## Thành viên
 
@@ -13,6 +13,8 @@
 | --: | ------ | ---- | ----- | ------ | ------- |
 |   1 | Nguyễn Hải Anh | 2A202603484 | haianh29112@gmail.com | haianh02034 | Workflow (Shape A) |
 |   2 | Nguyễn Ngọc Hiếu | 2A202603502 | hieunn3003@gmail.com | NguyenNgocHieu03502 | Orchestrator + handoff (Shape C) |
+|   3 | Bùi Văn Lâm | 2A202603400 | 26ai.lambv@vinuni.edu.vn | buivanlam | Single ReAct (Shape B) |
+|   4 | Phí Hoàng Nam | 2A202603435 | phinamyb2004@gmail.com | PhiHoangNamRaymond | Tích hợp và kiểm thử an toàn |
 
 Gợi ý chia vai:
 
@@ -26,7 +28,9 @@ Gợi ý chia vai:
 | Người | Vai | Commit | Test đã thêm hoặc sửa |
 | --- | --- | --- | --- |
 | Nguyễn Hải Anh | workflow | 54917fd | src/tests/test_workflow_shape.py |
-| Nguyễn Ngọc Hiếu | orchestrator | 3565f22 | (chưa có: test orchestrator do thành viên khác phụ trách) |
+| Nguyễn Ngọc Hiếu | orchestrator và tích hợp Shape B | 3565f22, f9966e2 | Chờ đối chiếu commit thêm hoặc sửa test của thành viên |
+| Bùi Văn Lâm | single ReAct | da5a5f2 (nhánh buivanlam), tích hợp vào main qua f9966e2 | Chờ đối chiếu commit thêm hoặc sửa test của thành viên |
+| Phí Hoàng Nam | tích hợp và kiểm thử an toàn | f76645f | src/tests/test_safety_integration.py |
 
 ## Cá nhân
 
@@ -87,16 +91,13 @@ Sao chép mục dưới đây cho từng thành viên.
 - `python -m lab8.check_submission`: `[ OK ] shape orchestrator: format đúng, 12/12 claim public pass ở seed 11`
 - Báo cáo chi tiết: `report/team/2A202603502_NguyenNgocHieu.md`
 
-## MSSV_HoTen
+## 2A202603400_BuiVanLam
 
-### Phần việc phụ trách
+- Shape B dùng vòng ReAct tối đa 8 bước, công cụ đọc và cổng ghi hoàn tiền của host.
+- Báo cáo cá nhân: [2A202603400_BuiVanLam.md](report/team/2A202603400_BuiVanLam.md).
 
--
+## 2A202603435_PhiHoangNam
 
-### Đóng góp cụ thể
-
--
-
-### Bằng chứng
-
--
+- Tích hợp và kiểm thử các ca crash sau checkpoint, approval cấp cho claim khác và secret trong ticket.
+- Sửa trace Workflow và chạy lại test, benchmark, crash suite trước khi chốt ADR.
+- Báo cáo cá nhân: [2A202603435_PhiHoangNam.md](report/team/2A202603435_PhiHoangNam.md).
