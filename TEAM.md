@@ -12,7 +12,7 @@
 | STT | Họ tên | MSSV | Email | GitHub | Vai trò |
 | --: | ------ | ---- | ----- | ------ | ------- |
 |   1 | Nguyễn Hải Anh | 2A202603484 | haianh29112@gmail.com | haianh02034 | Workflow (Shape A) |
-|   2 |        |      |       |        |         |
+|   2 | Nguyễn Ngọc Hiếu | 2A202603502 | hieunn3003@gmail.com | NguyenNgocHieu03502 | Orchestrator + handoff (Shape C) |
 
 Gợi ý chia vai:
 
@@ -26,6 +26,7 @@ Gợi ý chia vai:
 | Người | Vai | Commit | Test đã thêm hoặc sửa |
 | --- | --- | --- | --- |
 | Nguyễn Hải Anh | workflow | 54917fd | src/tests/test_workflow_shape.py |
+| Nguyễn Ngọc Hiếu | orchestrator | 3565f22 | (chưa có: test orchestrator do thành viên khác phụ trách) |
 
 ## Cá nhân
 
@@ -64,6 +65,27 @@ Sao chép mục dưới đây cho từng thành viên.
 - Ma trận student: `pytest -q -m student -o addopts= -k workflow` (62/62 tests passed)
 - Báo cáo chi tiết: `report/team/2A202603484_NguyenHaiAnh.md`
 - Công cụ kiểm tra nộp bài: `python -m lab8.check_submission` ghi nhận `[ OK ] shape workflow: format đúng, 12/12 claim public pass ở seed 11`.
+
+## 2A202603502_NguyenNgocHieu
+
+### Phần việc phụ trách
+
+- Shape C: orchestrator và investigator chỉ đọc (`src/lab8/shapes/orchestrator.py`), gồm dựng handoff theo allowlist.
+
+### Đóng góp cụ thể
+
+- Hiện thực `run_claim` cho Shape C:
+  + Orchestrator đọc claim qua `get_claim_view`; chữ trong ticket không được ghi vào trace, không dùng để chọn đơn hay số ngày trễ.
+  + Dựng handoff bằng `make_handoff` với `facts={}` và chỉ tool đọc (`lookup_order`, `lookup_policy`, `lookup_refund_history`, `compute_compensation`); trace chỉ ghi handoff đã sanitize.
+  + Investigator chạy qua `run_readonly_investigators`; tiền do `compute_compensation` tính, MockLLM chỉ soạn chữ.
+  + Chỉ orchestrator gọi `durability.issue_refund` với quote đầy đủ và `crash_at`; `InjectedCrash` được ghi trace rồi ném lại.
+
+### Bằng chứng
+
+- Commit: `3565f22` (`feat(shape-c): implement orchestrator with read-only investigators`)
+- Ma trận student: `pytest -q -m student -o addopts= -k orchestrator` (62/62 passed)
+- `python -m lab8.check_submission`: `[ OK ] shape orchestrator: format đúng, 12/12 claim public pass ở seed 11`
+- Báo cáo chi tiết: `report/team/2A202603502_NguyenNgocHieu.md`
 
 ## MSSV_HoTen
 
