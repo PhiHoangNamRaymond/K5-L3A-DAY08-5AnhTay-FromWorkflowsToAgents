@@ -13,8 +13,6 @@ from lab8.shapes import SHAPES
 from tests.conftest import BY_ID
 
 STUDENT_SHAPES = ("workflow", "single", "orchestrator")
-pytestmark = pytest.mark.student
-
 
 @pytest.mark.parametrize("shape", (*STUDENT_SHAPES, "swarm"))
 def test_resume_after_checkpoint_keeps_one_refund(public_db, shape):
