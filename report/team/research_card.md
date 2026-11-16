@@ -17,19 +17,19 @@ Phần này nối tiếp phần mini research ở buổi lý thuyết (slide 62�
 
 | Field | Hướng dẫn | Nhóm điền |
 | --- | --- | --- |
-| CÂU | R1 / R2 / R3 / R4 | |
-| SOURCE | Paper/blog, năm, URL, loại bằng chứng (benchmark, production report, blog kinh nghiệm) | |
-| CLAIM | Một kết luận gốc của nguồn. Không viết rộng hơn phạm vi paper | |
-| BOUNDARY | Model / dataset / setup giới hạn kết luận đó | |
-| HYPOTHESIS | Nếu đổi shape A→B (hoặc bật/tắt một thành phần), metric X sẽ đổi theo hướng nào, khoảng bao nhiêu | |
-| METHOD | Biến giữ cố định: model, tools, seed, corpus, giá, evaluator. Biến duy nhất được thay đổi: … | |
-| FAILURE / METRIC | Một lỗi dự kiến và cách đo nó: pass rate, pass^5, variance, cost/success, leak, bypass | |
+| CÂU | R1 / R2 / R3 / R4 | R1 |
+| SOURCE | Paper/blog, năm, URL, loại bằng chứng (benchmark, production report, blog kinh nghiệm) | Google Research (2026), "Towards a Science of Scaling Agent Systems", arXiv/Google Research technical report, benchmark & ablation analysis |
+| CLAIM | Một kết luận gốc của nguồn. Không viết rộng hơn phạm vi paper | Multi-agent chỉ mang lại lợi thế về hiệu năng khi bài toán có các nhánh thực thi song song độc lập; với các luồng phụ thuộc tuần tự, overhead giao tiếp và gọi model làm tăng chi phí 35-70% mà không cải thiện pass rate |
+| BOUNDARY | Model / dataset / setup giới hạn kết luận đó | Áp dụng trên tập tác vụ xử lý khiếu nại tuần tự (LogiX-VN claims), MockLLM cố định theo seed, bảng giá token mô phỏng pricing.yaml |
+| HYPOTHESIS | Nếu đổi shape A→B (hoặc bật/tắt một thành phần), metric X sẽ đổi theo hướng nào, khoảng bao nhiêu | Chuyển từ Workflow (A) sang Single ReAct (B) và Swarm (D) sẽ làm tăng cost per success khoảng 35% đến 70%, trong khi pass rate không tăng thêm (giữ 1.000 hoặc giảm ở Swarm do variance) |
+| METHOD | Biến giữ cố định: model, tools, seed, corpus, giá, evaluator. Biến duy nhất được thay đổi: … | Cố định 14 public claims, 5 seeds (11, 22, 33, 44, 55), bộ công cụ DB, bảng giá mô phỏng, evaluator. Biến duy nhất thay đổi: kiến trúc điều phối (Workflow vs Single ReAct vs Orchestrator vs Swarm) |
+| FAILURE / METRIC | Một lỗi dự kiến và cách đo nó: pass rate, pass^5, variance, cost/success, leak, bypass | Đo bằng cost/success (VND), pass rate, seed variance. Điểm yếu dự kiến: Swarm giao tiếp ngang hàng làm đội chi phí và sinh variance (T02 seed 55) |
 
 ## Kết quả ablation
 
-- Lệnh đã chạy (copy nguyên văn):
-- Run id / file report:
-- Kết quả so với hypothesis (đúng / sai / không kết luận được), kèm số liệu:
+- Lệnh đã chạy (copy nguyên văn): `python -m lab8.benchmark --shapes workflow,single,orchestrator,swarm --cases data/public_claims.jsonl --seeds 11,22,33,44,55 --out reports/benchmark.json`
+- Run id / file report: `src/reports/benchmark.json (Run id mẫu: R-single-C-001-s11, R-workflow-C-001-s11)`
+- Kết quả so với hypothesis (đúng / sai / không kết luận được), kèm số liệu: Đúng về hướng, vượt khoảng dự đoán ở hai shape. Workflow đạt 27.86 VND/success, Single ReAct là 39.53 VND (+42%, trong khoảng 35–70%), Swarm là 49.57 VND (+78%) và Orchestrator là 56.52 VND (+103%), hai shape sau vượt khoảng dự đoán. Pass rate của Workflow, Single và Orchestrator đều là 1.000 với variance 0.000000, nên chi phí tăng mà pass rate không tăng; Swarm giảm xuống 0.986 (pass^5 0.929) với variance 0.000816 do lỗi tin ticket ở T02 seed 55.
 - Giới hạn: MockLLM không phải model sản xuất, latency là `unavailable`.
 
 Muốn đi xa hơn một ablation để lấy điểm cộng thì xem [docs/bonus_topics.md](../../docs/bonus_topics.md).
