@@ -31,6 +31,7 @@ Gợi ý chia vai:
 | Nguyễn Hải Anh | workflow | 54917fd | src/tests/test_workflow_shape.py |
 | Nguyễn Ngọc Hiếu | orchestrator | 3565f22 | src/tests/test_orchestrator_boundaries.py |
 | Bùi Văn Lâm | single | f9966e2 | src/tests/test_single_shape.py |
+| Vũ Quang Dũng | orchestrator-test | 726d632 | src/tests/test_orchestrator_shape.py |
 
 ## Cá nhân
 
