@@ -5,7 +5,7 @@
 - Họ tên: Nguyễn Ngọc Hiếu
 - MSSV: 2A202603502
 - Email: hieunn3003@gmail.com
-- GitHub: NguyenNgocHieu03502
+- GitHub: robyvn
 - Vai trò: Orchestrator + handoff (Shape C)
 
 ## 2. Phần việc phụ trách
