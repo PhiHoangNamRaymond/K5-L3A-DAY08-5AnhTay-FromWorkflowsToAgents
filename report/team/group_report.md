@@ -109,7 +109,8 @@ Chi tiết đóng góp và phân công trách nhiệm được ghi nhận tại 
 - **Bùi Văn Lâm:** Thiết kế và cài đặt Shape B (`single.py`), thiết lập ReAct guardrail, xác minh toàn bộ 62 student tests của Shape B và điều phối thực nghiệm benchmark.
 - **Nguyễn Hải Anh:** Cài đặt Shape A (`workflow.py`) và bộ test `src/tests/test_workflow_shape.py`.
 - **Nguyễn Ngọc Hiếu:** Cài đặt Shape C (`orchestrator.py`) với handoff allowlist và investigator chỉ đọc; đưa Shape B vào `main`, chạy lại benchmark và crash test.
-- **Vũ Quang Dũng:** Viết bộ test riêng cho Single và Orchestrator, gồm kiểm tra resume sau cả ba mốc crash. [Báo cáo cá nhân](2A202603486_VuQuangDung.md). Tích hợp các ca crash sau checkpoint, approval mượn từ claim khác và secret trong ticket. Sửa trace Workflow, chạy lại bằng chứng và cập nhật ADR. [Báo cáo cá nhân](2A202603435_PhiHoangNam.md).
+- **Vũ Quang Dũng:** Viết bộ test riêng cho Single và Orchestrator, gồm kiểm tra resume sau cả ba mốc crash. [Báo cáo cá nhân](2A202603486_VuQuangDung.md).
+- **Phí Hoàng Nam:** Tích hợp các ca crash sau checkpoint, approval mượn từ claim khác và secret trong ticket. Sửa trace Workflow, chạy lại bằng chứng và cập nhật ADR. [Báo cáo cá nhân](2A202603435_PhiHoangNam.md).
 
 ---
 
