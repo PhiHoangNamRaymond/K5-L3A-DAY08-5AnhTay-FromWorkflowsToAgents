@@ -5,7 +5,7 @@
 - Tên nhóm: 5AnhTay
 - Lớp: L3A
 - Repo nhóm: `K5-L3A-DAY08-5AnhTay-FromWorkflowsToAgents` (xem [SUBMISSION.md](SUBMISSION.md))
-- URL repo, nhánh nộp, commit chốt: https://github.com/PhiHoangNamRaymond/K5-L3A-DAY08-5AnhTay-FromWorkflowsToAgents.git, nhánh main, commit `467d7d8`
+- URL repo, nhánh nộp, commit chốt: https://github.com/PhiHoangNamRaymond/K5-L3A-DAY08-5AnhTay-FromWorkflowsToAgents.git, nhánh main, commit `c1d6059`
 
 ## Thành viên
 
@@ -29,11 +29,11 @@ Gợi ý chia vai:
 
 | Người | Vai | Commit | Test đã thêm hoặc sửa |
 | --- | --- | --- | --- |
-| Nguyễn Hải Anh | workflow | 54917fd | src/tests/test_workflow_shape.py |
-| Nguyễn Ngọc Hiếu | Orchestrator và tích hợp Shape B | 3565f22, f9966e2, f5505ed | src/tests/test_orchestrator_boundaries.py |
+| Nguyễn Hải Anh | workflow | 54917fd | `src/tests/test_workflow_shape.py::test_workflow_idempotency_retry` |
+| Nguyễn Ngọc Hiếu | Orchestrator và tích hợp Shape B | 3565f22, f9966e2, f5505ed | `src/tests/test_orchestrator_boundaries.py::test_trace_records_sanitized_handoff_only` |
 | Bùi Văn Lâm | Single ReAct | da5a5f2 (nhánh buivanlam), tích hợp qua f9966e2 | Ma trận student kiểm tra Shape B. Chờ commit test do Lâm thêm hoặc sửa. |
-| Vũ Quang Dũng | Kiểm thử Shape B và C | 726d632 | src/tests/test_orchestrator_shape.py, src/tests/test_single_shape.py |
-| Phí Hoàng Nam | Tích hợp và kiểm thử an toàn | f76645f | src/tests/test_safety_integration.py |
+| Vũ Quang Dũng | Kiểm thử Shape B và C | 726d632 | `src/tests/test_orchestrator_shape.py::test_orchestrator_crash_then_resume_yields_single_refund`, `src/tests/test_single_shape.py::test_single_crash_then_resume_yields_single_refund` |
+| Phí Hoàng Nam | Tích hợp và kiểm thử an toàn | f76645f, c1d6059 | `src/tests/test_safety_integration.py::test_resume_after_checkpoint_keeps_one_refund`, `test_approval_for_another_claim_is_denied_at_shape_entry`, `test_ticket_secret_is_absent_from_result_trace_and_stdout` |
 
 ## Cá nhân
 
