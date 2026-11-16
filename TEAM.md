@@ -13,6 +13,7 @@
 | --: | ------ | ---- | ----- | ------ | ------- |
 |   1 | Nguyễn Hải Anh | 2A202603484 | haianh29112@gmail.com | haianh02034 | Workflow (Shape A) |
 |   2 | Nguyễn Ngọc Hiếu | 2A202603502 | hieunn3003@gmail.com | NguyenNgocHieu03502 | Orchestrator + handoff (Shape C) |
+|   3 | Bùi Văn Lâm | 2A202603400 | 26ai.lambv@vinuni.edu.vn | buivanlam | Single (Shape B) |
 
 Gợi ý chia vai:
 
@@ -27,6 +28,7 @@ Gợi ý chia vai:
 | --- | --- | --- | --- |
 | Nguyễn Hải Anh | workflow | 54917fd | src/tests/test_workflow_shape.py |
 | Nguyễn Ngọc Hiếu | orchestrator | 3565f22 | (chưa có: test orchestrator do thành viên khác phụ trách) |
+| Bùi Văn Lâm | single | f9966e2 | src/tests/test_single_shape.py |
 
 ## Cá nhân
 

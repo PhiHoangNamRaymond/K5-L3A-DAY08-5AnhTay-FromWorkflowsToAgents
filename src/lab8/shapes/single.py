@@ -21,13 +21,14 @@ ones. `lab8.trace.Trace` does this; your own tracer is fine if it matches.
 from __future__ import annotations
 
 import sqlite3
+from typing import Any
 
 from lab8.db import connect
 from lab8.durability import InjectedCrash, issue_refund
 from lab8.mock_llm import complete
 from lab8.runtime import run_react
 from lab8.schemas import Budget, RunResult, make_run_id
-from lab8.shapes.common import finish, safe_dump
+from lab8.shapes.common import finish
 from lab8.tools import get_claim_view, tool_cost
 from lab8.trace import Trace
 
@@ -55,10 +56,167 @@ def _run(
 ) -> RunResult:
     budget = Budget()
     run_id = make_run_id("single", claim_id, seed)
-    trace = Trace(run_id)
+    trace = _Trace(run_id)
+    budget.add_tool(tool_cost())
 
-    def done(status: str, proposal: int, reason: str | None) -> RunResult:
-        trace.add("decision", {"status": status, "proposal_amount": int(proposal), "reason": reason})
+    claim = get_claim_view(conn, claim_id)
+    if not claim.get("found"):
+        trace.add("error", {"reason": "unknown_claim"})
+        return finish(
+            conn,
+            shape="single",
+            claim_id=claim_id,
+            seed=seed,
+            status="failed",
+            proposal_amount=0,
+            budget=budget,
+            trace=trace,
+            error_reason="unknown_claim",
+        )
+
+    ticket = claim.get("ticket", "")
+    complete(budget, seed=seed, purpose="parse", prompt=ticket)
+
+    if not claim.get("order_id"):
+        complete(budget, seed=seed, purpose="draft", prompt="needs_info")
+        trace.add("decision", {"status": "needs_info"})
+        return finish(
+            conn,
+            shape="single",
+            claim_id=claim_id,
+            seed=seed,
+            status="needs_info",
+            proposal_amount=0,
+            budget=budget,
+            trace=trace,
+            error_reason="missing_order_id",
+        )
+
+    stored_order: dict[str, Any] | None = None
+    stored_refund_history: dict[str, Any] | None = None
+
+    def decide(seen: dict[str, Any]) -> dict[str, Any]:
+        nonlocal stored_order, stored_refund_history
+        last_tool = seen.get("last_tool")
+        last_result = seen.get("last_result")
+        complete(budget, seed=seed, purpose="react_step", prompt=last_tool or "start")
+
+        if last_tool is None:
+            return {
+                "tool": "lookup_order",
+                "args": {
+                    "order_id": claim.get("order_id"),
+                    "principal_id": claim.get("principal_id"),
+                },
+            }
+
+        if last_tool == "lookup_order":
+            if not last_result.get("visible"):
+                return {
+                    "final": {
+                        "status": "escalated",
+                        "reason": last_result.get("reason"),
+                        "proposal": 0,
+                    }
+                }
+            stored_order = last_result.get("order")
+            return {
+                "tool": "lookup_refund_history",
+                "args": {
+                    "order_id": claim.get("order_id"),
+                    "principal_id": claim.get("principal_id"),
+                },
+            }
+
+        if last_tool == "lookup_refund_history":
+            stored_refund_history = last_result
+            return {
+                "tool": "compute_compensation",
+                "args": {"order": stored_order},
+            }
+
+        if last_tool == "compute_compensation":
+            quote_payload = last_result
+            proposal = int(quote_payload.get("amount_vnd", 0))
+            return {
+                "final": {
+                    "status": "ready",
+                    "order": stored_order,
+                    "quote": quote_payload,
+                    "proposal": proposal,
+                }
+            }
+
+        return {"final": {"status": "failed", "reason": "unexpected_react_state", "proposal": 0}}
+
+    trace.add("react_init", {"claim_id": claim_id, "order_id": claim.get("order_id")})
+    react_result = run_react(
+        conn,
+        budget,
+        observation={"claim": claim},
+        decide=decide,
+        max_steps=8,
+        worker=False,
+    )
+    final = react_result.get("final") or {}
+
+    if final.get("status") == "escalated":
+        complete(budget, seed=seed, purpose="draft", prompt="escalated")
+        trace.add("decision", {"status": "escalated", "reason": final.get("reason")})
+        return finish(
+            conn,
+            shape="single",
+            claim_id=claim_id,
+            seed=seed,
+            status="escalated",
+            proposal_amount=0,
+            budget=budget,
+            trace=trace,
+            error_reason=final.get("reason"),
+        )
+
+    if final.get("status") == "failed" or react_result.get("stopped") == "step_cap":
+        error_reason = final.get("reason") or "step_cap"
+        trace.add("decision", {"status": "failed", "reason": error_reason})
+        return finish(
+            conn,
+            shape="single",
+            claim_id=claim_id,
+            seed=seed,
+            status="failed",
+            proposal_amount=0,
+            budget=budget,
+            trace=trace,
+            error_reason=error_reason,
+        )
+
+    proposal = int(final.get("proposal", 0))
+    quote_payload = final.get("quote") or {}
+    trace.add("quote", quote_payload)
+    complete(budget, seed=seed, purpose="draft", prompt=f"proposal={proposal}")
+
+    if proposal <= 0:
+        return finish(
+            conn,
+            shape="single",
+            claim_id=claim_id,
+            seed=seed,
+            status="denied",
+            proposal_amount=0,
+            budget=budget,
+            trace=trace,
+            error_reason=quote_payload.get("reason"),
+        )
+
+    try:
+        outcome = issue_refund(conn, claim_id, proposal, crash_at=crash_at)
+    except InjectedCrash:
+        trace.add("crash", {"at": crash_at})
+        trace.write()
+        raise
+
+    if not outcome["ok"]:
+        status = "failed" if outcome["conflict"] else "denied"
         return finish(
             conn,
             shape="single",
@@ -68,88 +226,34 @@ def _run(
             proposal_amount=proposal,
             budget=budget,
             trace=trace,
-            error_reason=reason,
+            error_reason=outcome["reason"],
         )
 
-    # 1. Read the claim through the view (ticket is user data, never traced in full beyond the view).
-    budget.add_tool(tool_cost())
-    claim = get_claim_view(conn, claim_id)
-    if not claim.get("found"):
-        return done("failed", 0, "unknown_claim")
-    trace.add("claim", {"claim_id": claim_id, "has_order_id": bool(claim.get("order_id"))})
-    if not claim.get("order_id"):
-        complete(budget, seed=seed, purpose="draft", prompt="needs_info")
-        return done("needs_info", 0, "missing_order_id")
-
-    principal_id = claim["principal_id"]
-    order_id = claim["order_id"]
-    state: dict[str, object] = {"order": {}, "policy_count": 0}
-
-    def decide(seen: dict) -> dict:
-        # Step 1: resolve the order row. This is the source of truth, never the ticket.
-        if "last_tool" not in seen:
-            return {
-                "tool": "lookup_order",
-                "args": {"order_id": order_id, "principal_id": principal_id},
-            }
-        last_tool = seen.get("last_tool")
-        last_result = seen.get("last_result") or {}
-        if last_tool == "lookup_order":
-            if not last_result.get("visible"):
-                return {"final": {"status": "escalated", "reason": last_result.get("reason")}}
-            state["order"] = dict((last_result.get("order") or {}))
-            return {"tool": "lookup_policy", "args": {}}
-        if last_tool == "lookup_policy":
-            policies = (last_result.get("policies") or [])
-            state["policy_count"] = len(policies)
-            return {"tool": "lookup_refund_history", "args": {"order_id": order_id, "principal_id": principal_id}}
-        if last_tool == "lookup_refund_history":
-            order = state.get("order") or {}
-            return {"tool": "compute_compensation", "args": {"order": dict(order)}}
-        # Quote is ready; stop the loop.
-        return {"final": {"status": "quoted"}}
-
-    outcome = run_react(
+    return finish(
         conn,
-        budget,
-        observation={"claim": claim},
-        decide=decide,
-        max_steps=8,
-        worker=True,
+        shape="single",
+        claim_id=claim_id,
+        seed=seed,
+        status="resolved",
+        proposal_amount=proposal,
+        budget=budget,
+        trace=trace,
+        error_reason=None,
     )
-    trace.add("react", safe_dump({"stopped": outcome.get("stopped"), "final": outcome.get("final")}))
-    if outcome.get("stopped") == "step_cap":
-        complete(budget, seed=seed, purpose="draft", prompt="step_cap")
-        return done("failed", 0, "step_cap")
 
-    final = outcome.get("final") or {}
-    if final.get("status") == "escalated":
-        complete(budget, seed=seed, purpose="draft", prompt="escalated")
-        return done("escalated", 0, final.get("reason"))
 
-    obs = outcome.get("observation") or {}
-    quote = obs.get("last_result") or {}
-    if obs.get("last_tool") != "compute_compensation" or "amount_vnd" not in quote:
-        return done("failed", 0, "missing_quote")
+class _Trace:
+    """Local alias wrapping lab8.trace.Trace so a crash can flush before propagating."""
 
-    order_view = {"order": state.get("order"), "policy_count": state.get("policy_count")}
-    trace.add("investigator", safe_dump({"lookup_order": state.get("order"), "policy_count": state.get("policy_count")}))
-    trace.add("quote", safe_dump(quote))
-    _ = order_view
-    complete(budget, seed=seed, purpose="draft", prompt=f"proposal={quote.get('amount_vnd', 0)}")
+    def __init__(self, run_id: str) -> None:
+        self._inner = Trace(run_id)
 
-    proposal = int(quote.get("amount_vnd", 0))
-    if proposal <= 0:
-        return done("denied", 0, quote.get("reason"))
+    def add(self, kind: str, payload: dict) -> None:
+        self._inner.add(kind, payload)
 
-    try:
-        refund = issue_refund(conn, claim_id, proposal, crash_at=crash_at)
-    except InjectedCrash:
-        trace.add("crash", {"at": crash_at})
-        trace.write()
-        raise
+    def write(self) -> str:
+        return self._inner.write()
 
-    trace.add("refund_outcome", safe_dump(refund))
-    if refund["ok"]:
-        return done("resolved", proposal, None)
-    return done("failed" if refund.get("conflict") else "denied", proposal, refund.get("reason"))
+    @property
+    def run_id(self) -> str:
+        return self._inner.run_id
