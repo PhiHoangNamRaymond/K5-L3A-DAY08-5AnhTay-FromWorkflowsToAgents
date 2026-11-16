@@ -22,7 +22,7 @@ Tích hợp và kiểm thử an toàn các kiến trúc xử lý yêu cầu hoà
 ## 4. Bằng chứng
 
 - Commit kỹ thuật: `f76645f`.
-- Test tích hợp: [test_safety_integration.py](../../src/tests/test_safety_integration.py). Trước khi sửa có 1 ca fail ở Workflow. Sau khi sửa, 10 ca tích hợp và toàn bộ 318 test đều pass.
+- Test tích hợp: [test_safety_integration.py](../../src/tests/test_safety_integration.py). Trước khi sửa có 1 ca fail ở Workflow. Sau khi sửa, 10 ca tích hợp đều pass. Sau khi nhập main của nhóm, commit `467d7d8` đạt 347/347 test.
 - Crash suite chính thức đạt 20/20 cho các kịch bản của host và Swarm. Các ca T11, T12 và `after_checkpoint` trên A–C có bằng chứng riêng trong pytest. [Crash report](../../src/reports/crash.json).
 - Workflow đạt 70/70 trial public và 27,86 VND mô phỏng trên mỗi lần thành công. Run ID đối chiếu là `R-workflow-C-001-s11`. [Benchmark](../../src/reports/benchmark.json) · [ADR](decision_adr.md).
 

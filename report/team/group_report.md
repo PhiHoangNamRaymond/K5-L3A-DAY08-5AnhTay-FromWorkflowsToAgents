@@ -2,7 +2,7 @@
 
 > **Nhóm:** 5AnhTay · **Lớp:** L3A  
 > **Dự án:** K5-L3A-DAY08-5AnhTay-FromWorkflowsToAgents  
-> **Commit chốt:** `f76645f` (trùng `report/team/decision_adr.md`)
+> **Commit chốt:** `467d7d8` (trùng `report/team/decision_adr.md`)
 
 ---
 
@@ -10,7 +10,7 @@
 
 - Tên nhóm: 5AnhTay
 - Thành viên: xem [TEAM.md](../../TEAM.md)
-- Commit chốt: `f76645f`
+- Commit chốt: `467d7d8`
 
 ---
 
@@ -76,7 +76,7 @@ Toàn bộ số liệu dưới đây được trích xuất trực tiếp từ [
 | **D: `swarm`** *(Reference)* | 0.986 | 0.929 | 0.929 – 1.000 | 0.000816 | 49.57 | 2.80 | 3.0 | Thất bại T02 seed 55 do tin ticket |
 
 - Crash suite đạt **20/20** trên các kịch bản của host và Swarm. T11, T12 và ca `after_checkpoint` kiểm tra riêng A–C.
-- Các ca public và test tích hợp đã chạy trên A–C ghi nhận 0 lỗi rò secret hoặc vượt quyền approval. Toàn bộ 318 test pass, gồm 10 ca tích hợp mới.
+- Các ca public và test tích hợp đã chạy trên A–C ghi nhận 0 lỗi rò secret hoặc vượt quyền approval. Toàn bộ 347 test pass trên commit sau khi nhập main, gồm 10 ca tích hợp an toàn.
 - Workflow đạt cùng pass rate với Single và Orchestrator ở chi phí mô phỏng thấp nhất. Chi tiết lựa chọn ở [ADR](decision_adr.md).
 - Trong ablation của Orchestrator, tắt lượt đọc lịch sử giảm chi phí từ 56,52 xuống 47,23 VND trên mỗi lần thành công. Hai điều kiện đều đạt 70/70 trial. [Research card](research_card.md).
 
@@ -109,7 +109,7 @@ Chi tiết đóng góp và phân công trách nhiệm được ghi nhận tại 
 - **Bùi Văn Lâm:** Thiết kế và cài đặt Shape B (`single.py`), thiết lập ReAct guardrail, xác minh toàn bộ 62 student tests của Shape B và điều phối thực nghiệm benchmark.
 - **Nguyễn Hải Anh:** Cài đặt Shape A (`workflow.py`) và bộ test `src/tests/test_workflow_shape.py`.
 - **Nguyễn Ngọc Hiếu:** Cài đặt Shape C (`orchestrator.py`) với handoff allowlist và investigator chỉ đọc; đưa Shape B vào `main`, chạy lại benchmark và crash test.
-- **Phí Hoàng Nam:** Tích hợp các ca crash sau checkpoint, approval mượn từ claim khác và secret trong ticket. Sửa trace Workflow, chạy lại bằng chứng và cập nhật ADR. [Báo cáo cá nhân](2A202603435_PhiHoangNam.md).
+- **Vũ Quang Dũng:** Viết bộ test riêng cho Single và Orchestrator, gồm kiểm tra resume sau cả ba mốc crash. [Báo cáo cá nhân](2A202603486_VuQuangDung.md). Tích hợp các ca crash sau checkpoint, approval mượn từ claim khác và secret trong ticket. Sửa trace Workflow, chạy lại bằng chứng và cập nhật ADR. [Báo cáo cá nhân](2A202603435_PhiHoangNam.md).
 
 ---
 

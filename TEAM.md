@@ -5,7 +5,7 @@
 - Tên nhóm: 5AnhTay
 - Lớp: L3A
 - Repo nhóm: `K5-L3A-DAY08-5AnhTay-FromWorkflowsToAgents` (xem [SUBMISSION.md](SUBMISSION.md))
-- URL repo, nhánh nộp, commit chốt: https://github.com/PhiHoangNamRaymond/K5-L3A-DAY08-5AnhTay-FromWorkflowsToAgents.git, nhánh main
+- URL repo, nhánh nộp, commit chốt: https://github.com/PhiHoangNamRaymond/K5-L3A-DAY08-5AnhTay-FromWorkflowsToAgents.git, nhánh main, commit `467d7d8`
 
 ## Thành viên
 
@@ -14,7 +14,7 @@
 |   1 | Nguyễn Hải Anh | 2A202603484 | haianh29112@gmail.com | haianh02034 | Workflow (Shape A) |
 |   2 | Nguyễn Ngọc Hiếu | 2A202603502 | hieunn3003@gmail.com | robyvn | Orchestrator + handoff (Shape C) |
 |   3 | Bùi Văn Lâm | 2A202603400 | 26ai.lambv@vinuni.edu.vn | buivanlam | Single (Shape B) |
-|   4 | Vũ Quang Dũng | 2A202603486 | vuquangdung2309@gmail.com | https://github.com/qdung2003 | Kiểm thử Shape C (test C8) |
+|   4 | Vũ Quang Dũng | 2A202603486 | vuquangdung2309@gmail.com | https://github.com/qdung2003 | Kiểm thử Shape B và C (test C8) |
 |   5 | Phí Hoàng Nam | 2A202603435 | phinamyb2004@gmail.com | PhiHoangNamRaymond | Tích hợp và kiểm thử an toàn |
 
 
