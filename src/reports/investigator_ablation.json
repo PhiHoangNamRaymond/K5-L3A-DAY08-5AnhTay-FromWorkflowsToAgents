@@ -1,0 +1,138 @@
+{
+  "intervention": "lookup_refund_history",
+  "arms": {
+    "with_history": {
+      "investigator_tools": [
+        "lookup_order",
+        "lookup_policy",
+        "lookup_refund_history",
+        "compute_compensation"
+      ],
+      "summary": {
+        "trials": 70,
+        "graded_trials": 70,
+        "reasons": {
+          "ok": 70
+        },
+        "successes": 70,
+        "pass_rate": 1.0,
+        "pass_5": 1.0,
+        "seed_pass_rates": {
+          "11": 1.0,
+          "22": 1.0,
+          "33": 1.0,
+          "44": 1.0,
+          "55": 1.0
+        },
+        "seed_variance": 0.0,
+        "seed_min": 1.0,
+        "seed_max": 1.0,
+        "cost_per_success_vnd": 56.515714285714324,
+        "total_simulated_cost_vnd": 3956.1000000000026,
+        "mean_steps": 4.714285714285714,
+        "p95_steps": 5.0,
+        "mean_model_calls": 0.8571428571428571,
+        "mean_tool_calls": 5.571428571428571,
+        "cost_note": "simulated_not_real_api_price",
+        "latency": "unavailable"
+      },
+      "example_trial": {
+        "shape": "orchestrator",
+        "claim_id": "C-001",
+        "seed": 11,
+        "passed": true,
+        "reason": "ok",
+        "cost_estimate": 60.94,
+        "steps": 5,
+        "model_calls": 1,
+        "tool_calls": 6,
+        "run_id": "R-orchestrator-C-001-s11",
+        "status": "resolved"
+      }
+    },
+    "without_history": {
+      "investigator_tools": [
+        "lookup_order",
+        "lookup_policy",
+        "compute_compensation"
+      ],
+      "summary": {
+        "trials": 70,
+        "graded_trials": 70,
+        "reasons": {
+          "ok": 70
+        },
+        "successes": 70,
+        "pass_rate": 1.0,
+        "pass_5": 1.0,
+        "seed_pass_rates": {
+          "11": 1.0,
+          "22": 1.0,
+          "33": 1.0,
+          "44": 1.0,
+          "55": 1.0
+        },
+        "seed_variance": 0.0,
+        "seed_min": 1.0,
+        "seed_max": 1.0,
+        "cost_per_success_vnd": 47.23000000000004,
+        "total_simulated_cost_vnd": 3306.1000000000026,
+        "mean_steps": 4.714285714285714,
+        "p95_steps": 5.0,
+        "mean_model_calls": 0.8571428571428571,
+        "mean_tool_calls": 4.642857142857143,
+        "cost_note": "simulated_not_real_api_price",
+        "latency": "unavailable"
+      },
+      "example_trial": {
+        "shape": "orchestrator",
+        "claim_id": "C-001",
+        "seed": 11,
+        "passed": true,
+        "reason": "ok",
+        "cost_estimate": 50.94,
+        "steps": 5,
+        "model_calls": 1,
+        "tool_calls": 5,
+        "run_id": "R-orchestrator-C-001-s11",
+        "status": "resolved"
+      }
+    }
+  },
+  "controlled_variables": {
+    "as_of": "2026-11-15",
+    "seeds": [
+      11,
+      22,
+      33,
+      44,
+      55
+    ],
+    "claim_ids": [
+      "C-001",
+      "C-002",
+      "C-003",
+      "C-004",
+      "C-005",
+      "C-006",
+      "C-007",
+      "C-008",
+      "C-009",
+      "C-010",
+      "C-011",
+      "C-012",
+      "C-013",
+      "C-014"
+    ],
+    "pricing": {
+      "simulated": true,
+      "currency": "VND",
+      "input_per_1k_tokens_vnd": 20,
+      "output_per_1k_tokens_vnd": 80,
+      "tool_call_vnd": 10
+    },
+    "model_backend": "MockLLM",
+    "latency": "unavailable",
+    "isolation": "fresh_sqlite_per_trial"
+  }
+}

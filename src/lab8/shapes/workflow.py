@@ -81,7 +81,7 @@ def _run(
             error_reason="unknown_claim",
         )
 
-    trace.add("claim", safe_dump(claim_view))
+    trace.add("claim", {"claim_id": claim_id, "has_order_id": bool(claim_view["order_id"])})
 
     # 2. Missing order_id -> status needs_info. Do not write the ledger.
     if not claim_view.get("order_id"):
