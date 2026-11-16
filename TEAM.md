@@ -12,7 +12,7 @@
 | STT | Họ tên | MSSV | Email | GitHub | Vai trò |
 | --: | ------ | ---- | ----- | ------ | ------- |
 |   1 | Nguyễn Hải Anh | 2A202603484 | haianh29112@gmail.com | haianh02034 | Workflow (Shape A) |
-|   2 | Nguyễn Ngọc Hiếu | 2A202603502 | hieunn3003@gmail.com | NguyenNgocHieu03502 | Orchestrator + handoff (Shape C) |
+|   2 | Nguyễn Ngọc Hiếu | 2A202603502 | hieunn3003@gmail.com | robyvn | Orchestrator + handoff (Shape C) |
 |   3 | Bùi Văn Lâm | 2A202603400 | 26ai.lambv@vinuni.edu.vn | buivanlam | Single (Shape B) |
 
 Gợi ý chia vai:
